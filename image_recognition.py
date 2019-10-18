@@ -50,6 +50,5 @@ def setup_model():
 	return model
 
 def normalize(prediction, normalize_range):
-	normalized_prediction = normalize_range * normalize_range
-	return normalized_data
+	normalized_data = prediction * normalize_range
 	return normalized_data
