@@ -11,6 +11,7 @@ import tensorflow as tf
 from tensorflow import keras
 
 import numpy as np
+import csv
 
 file_name = "oasis_cross_sectional.csv"	
 sort_name = "MMSE" # Either CDR or MMSE
@@ -18,7 +19,7 @@ mri_types = ["t88_gfc_tra", "t88_masked_gfc_tra", "t88_masked_gfc_fseg_tra","t88
 
 max_size = 100, 100
 
-total_epochs = 500
+total_epochs = 100
 total_batch_size = 10
 
 ML = True
@@ -29,7 +30,7 @@ sort_dict = {
 }
 
 sort_number = sort_dict[sort_name.upper()]
-mri_type = mri_types[1]
+
 
 '''
 Data Organization
@@ -42,53 +43,57 @@ total_patients = len(patient_data)
 
 # sort_data(patient_data, sort_number)
 
-img_names, label_data = crawl_for_images(mri_type, patient_data, sort_number)
+# Start parsing mri types
+
+for mri_type in mri_types:
+	img_names, label_data = crawl_for_images(mri_type, patient_data, sort_number)
 
 
 	
-if ML:
-	(images, labels) = load_data(img_names, label_data, max_size)
+	if ML:
+		(images, labels) = load_data(img_names, label_data, max_size)
 	
-	# Max (max of array)/ middle (middle of array)
-	max = int(images.shape[0]-1)
-	middle = int(images.shape[0]/2)
+		# Max (max of array)/ middle (middle of array)
+		max = int(images.shape[0]-1)
+		middle = int(images.shape[0]/2)
 
 	
-	# Create train and test images & labels
-	train_images = images[0:middle]
-	train_labels = labels[0:middle]
-	test_images = images[int(middle+1):max]
-	test_labels = labels[int(middle+1):max]
+		# Create train and test images & labels
+		train_images = images[0:middle]
+		train_labels = labels[0:middle]
+		test_images = images[int(middle+1):max]
+		test_labels = labels[int(middle+1):max]
 	
-	# Begin Modelling
-	model = setup_model()
-	train_images = train_images / 255.0
-	test_images = test_images / 255.0
+		# Begin Modelling
+		model = setup_model()
+		train_images = train_images / 255.0
+		test_images = test_images / 255.0
 	
-	model.fit(train_images, train_labels, validation_data=(test_images,test_labels), epochs = total_epochs, batch_size = total_batch_size, verbose = 2)
+		model.fit(train_images, train_labels, validation_data=(test_images,test_labels), epochs = total_epochs, batch_size = total_batch_size, verbose = 2)
 	
-	predictions = model.predict(test_images)
-	normalized_predictions = []
-	normalize_range = 30
-	counter = 0
-	correct_predictions = 0
+		predictions = model.predict(test_images)
+		normalized_predictions = []
+		normalize_range = 30
+		counter = 0
+		correct_predictions = 0
 	
-	errors = []
+		errors = []
 
-	for prediction in predictions:
-		max = np.amax(prediction)
-		outcomes = np.where(prediction == max)[0][0]
-		if not(isinstance(outcomes, list)):
-			outcomes = [outcomes]
-		for outcome in outcomes:
-			actual = test_labels[counter]
-			predicted = outcome
+		for prediction in predictions:
+			max = np.amax(prediction)
+			outcomes = np.where(prediction == max)[0][0]
+			if not(isinstance(outcomes, list)):
+				outcomes = [outcomes]
+			for outcome in outcomes:
+				actual = test_labels[counter]
+				predicted = outcome
 			
-			error = (abs(predicted - actual))/actual
+				error = (abs(predicted - actual))/actual
 			
-			errors.append(error)
-			counter += 1
-	total = counter
+				errors.append(error)
+				counter += 1
+	row = [mri_type,str((np.average(errors)*100))]
 	
-	print((np.average(errors)*100))
-		
+	with open('data.csv', 'a') as csvFile:
+		file = csv.writer(csvFile)
+		file.writerow(row)

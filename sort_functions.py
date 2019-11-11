@@ -75,10 +75,15 @@ def find(pattern, path):
 def crawl_for_images(mri_type, patient_data, sort_number):
 	image_paths = []
 	label_data = []
+	# goes through patient data
 	for patient in patient_data:
 		id = patient[0]
-		image_paths.append([find(id, mri_type)])
-		label_data.append(patient[1][sort_number])
+		# finds path for the mri_type subscribed
+		path = find(id, mri_type)
+		# if the path exists (i.e. the images exist, then append the label data)
+		if path:
+			image_paths.append([find(id, mri_type)])
+			label_data.append(patient[1][sort_number])
 	return image_paths, label_data
 
 # Creates a gif of all patients
