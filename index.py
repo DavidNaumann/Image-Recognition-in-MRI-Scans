@@ -24,6 +24,7 @@ warnings.filterwarnings('ignore')
 data_output = "data.csv"
 # opening the file with w+ mode truncates the file
 f = open(data_output, "w+")
+f.writelines(["Model, Error (%)\n"])
 f.close()
 
 # Setting up data collection from CSV and images
@@ -46,7 +47,7 @@ max_size = 100, 100 # Max Image Size
 total_epochs = 100
 total_batch_size = 5
 ML = True # Do Machine Learning (True/False)
-OVERWRITE_MODELS = True # Overwrite Existing Models (True/False)
+OVERWRITE_MODELS = False # Overwrite Existing Models (True/False)
 
 
 '''
@@ -76,15 +77,19 @@ for mri_type in mri_types:
 		max = int(images.shape[0]-1)
 		middle = int(images.shape[0]/2)
 
-		# Create train and test images & labels
+		# Uses middle of arrays to divide images and labels for training and testing
 		train_images = images[0:middle]
 		train_labels = labels[0:middle]
 		test_images = images[int(middle+1):max]
 		test_labels = labels[int(middle+1):max]
+
+		# Normalizes the values from (0 to 1)
 		train_images = train_images / 255.0
 		test_images = test_images / 255.0
-		print(save_location)
+
 		path_exists = os.path.exists(save_location)
+
+		# Checks if model exists and that model doesn't need retraining
 		if(path_exists and not OVERWRITE_MODELS):
 			print("Loading existing model for " + mri_type)
 			model = keras.models.load_model(save_location)
