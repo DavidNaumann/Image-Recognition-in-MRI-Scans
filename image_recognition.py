@@ -21,7 +21,7 @@ def convert_img(path, maxsize):
 	WIDTH, HEIGHT = img.size
 	if WIDTH != HEIGHT:
 		m_min_d = min(WIDTH, HEIGHT)
-		img = img.crop((0, 0, m_min_d, m_min_d))
+		img = img.resize((m_min_d,m_min_d))
         # Scale the image to the requested maxsize by Anti-alias sampling.
 	img.thumbnail(maxsize, PIL.Image.ANTIALIAS)
 	return np.asarray(img)

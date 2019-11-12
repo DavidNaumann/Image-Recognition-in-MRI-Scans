@@ -10,6 +10,7 @@ from tensorflow import keras
 # Utility libraries
 import numpy as np
 import csv
+import matplotlib.pyplot as plt
 
 # Ignoring General TensorFlow Warnings
 import os
@@ -45,7 +46,7 @@ max_size = 100, 100 # Max Image Size
 total_epochs = 100
 total_batch_size = 5
 ML = True # Do Machine Learning (True/False)
-OVERWRITE_MODELS = False # Overwrite Existing Models (True/False)
+OVERWRITE_MODELS = True # Overwrite Existing Models (True/False)
 
 
 '''
@@ -80,7 +81,6 @@ for mri_type in mri_types:
 		train_labels = labels[0:middle]
 		test_images = images[int(middle+1):max]
 		test_labels = labels[int(middle+1):max]
-		
 		train_images = train_images / 255.0
 		test_images = test_images / 255.0
 		print(save_location)
@@ -91,10 +91,10 @@ for mri_type in mri_types:
 		else:
 			# Begin Modelling
 			model = setup_model()
-	
+
 			# Fits model for image_recognition
 			model.fit(train_images, train_labels, validation_data=(test_images,test_labels), epochs = total_epochs, batch_size = total_batch_size, verbose = 2)
-		
+
 			# Saves model
 			keras.models.save_model(model, save_location)
 		
