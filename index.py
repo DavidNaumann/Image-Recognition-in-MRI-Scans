@@ -7,6 +7,9 @@ from microimaging import grad_viewer
 import tensorflow as tf
 from tensorflow import keras
 
+# Statistical Method library
+from Statistical-Methods import statistical_error
+
 # Utility libraries
 import numpy as np
 import csv
@@ -59,6 +62,8 @@ patient_data = retrieve_data(file_name)
 
 total_patients = len(patient_data)
 
+# Sorts data for closer inspection if need be
+#
 # sort_data(patient_data, sort_number)
 
 # Start parsing mri types
@@ -112,20 +117,27 @@ for mri_type in mri_types:
 	
 		errors = []
 
+		# Organizes the predictions
+
 		for prediction in predictions:
 			max = np.amax(prediction)
 			outcomes = np.where(prediction == max)[0][0]
 			if not(isinstance(outcomes, list)):
 				outcomes = [outcomes]
 			for outcome in outcomes:
-				img = test_images[counter]
+				# Actual value
 				actual = test_labels[counter]
+				
+				# Predicted value
 				predicted = outcome
-			
-				error = (abs(predicted - actual))/actual
+
+				# Estimates error using actual value and predicted value
+				error = statistical_error(actual, predicted)
 			
 				errors.append(error)
 				counter += 1
+	
+	# Creates rows of mri type name and error 
 	row = [mri_type,str((np.average(errors)*100))]
 	
 	with open(data_output, 'a') as csvFile:
